@@ -41,8 +41,8 @@ svg.call(d3.zoom().on("zoom", (event) => {
 }));
 
 d3.json("keyword_network_stringid.json").then(data => {
-  // 🔍 共起回数が3回以上のみ表示
-  const links = data.links.filter(d => d.value >= 3);
+  // 🔍 共起回数が2回以上のみ表示
+  const links = data.links.filter(d => d.value >= 2);
   const linkedWords = new Set(links.flatMap(d => [d.source, d.target]));
 
   // 出現頻度をノードサイズに使う
