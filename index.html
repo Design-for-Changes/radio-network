@@ -33,7 +33,7 @@
 
     const svg = d3.select("svg");
     
-    d3.json("keyword_network_full.json").then(data => {
+    d3.json("keyword_network_stringid.json").then(data => {
       const links = data.links.map(d => Object.create(d));
       const nodes = data.nodes.map(d => Object.create(d));
 
