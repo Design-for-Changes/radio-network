@@ -1,0 +1,192 @@
+
+body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background: #fff;
+    color: #222;
+    margin: 0;
+    padding: 20px;
+}
+.container {
+    display: block;
+    width: 80%;
+    margin: auto;
+}
+.left-column {
+    flex: 1 1 0;
+    min-width: 300px;
+}
+.right-column {
+    flex: 1 1 0;
+    min-width: 300px;
+}
+h1 {
+    font-size: 2.2em;
+    margin-bottom: 0.2em;
+}
+.kana {
+    font-size: 0.9em;
+    color: #777;
+    margin-bottom: 1em;
+}
+.catchcopy {
+    font-weight: bold;
+    color: #d95f02;
+    margin: 0;
+}
+h2 {
+    font-size: 1.2em;
+    margin-top: 2em;
+    margin-bottom: 0.5em;
+}
+ul {
+    padding-left: 1.2em;
+}
+li {
+    margin-bottom: 1.2em;
+}
+
+.affiliation {
+    font-size: 0.95em;
+    color: #666;
+    margin-bottom: 1.5em;
+}
+
+.highlight-block {
+    margin-bottom: 2em;
+}
+.catchcopy {
+    font-weight: bold;
+    color: #d95f02;
+    margin: 0;
+}
+.quote-title {
+    font-size: 1em;
+    font-weight: bold;
+    color: #444;
+    margin-top: 0.6em;
+    margin-bottom: 0.4em;
+}
+
+
+.profile-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1em;
+}
+.profile-table th {
+    text-align: left;
+    padding: 0.5em;
+    vertical-align: top;
+    width: 6em;
+    color: #333;
+    font-weight: bold;
+}
+.profile-table td {
+    padding: 0.5em;
+    color: #222;
+}
+
+.profile-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1em;
+    table-layout: fixed;
+}
+.profile-table th {
+    text-align: left;
+    padding: 0.5em;
+    vertical-align: top;
+    width: 33%;
+    color: #333;
+    font-weight: bold;
+}
+.profile-table td {
+    padding: 0.5em;
+    color: #222;
+    width: 67%;
+    word-wrap: break-word;
+}
+
+.profile-table tr {
+    border-bottom: 1px solid #ccc;
+}
+
+.profile-table tr:last-child {
+    border-bottom: none;
+}
+
+.highlight-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1em;
+    table-layout: fixed;
+    background: #f7f7f7;
+}
+.highlight-table th {
+    text-align: left;
+    vertical-align: top;
+    width: 8em;
+    padding: 0.5em;
+    color: #333;
+}
+.highlight-table td {
+    padding: 0.5em;
+}
+.highlight-table 
+.highlight-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1em;
+    table-layout: fixed;
+    background: #f7f7f7;
+}
+.highlight-table th {
+    text-align: left;
+    padding: 0.5em;
+    vertical-align: top;
+    width: 33%;
+    color: #333;
+    font-weight: bold;
+}
+.highlight-table td {
+    padding: 0.5em;
+    color: #222;
+    width: 67%;
+    word-wrap: break-word;
+}
+
+
+
+.catchcopy {
+    font-weight: bold;
+    color: #d95f02;
+    margin: 0;
+}
+
+.speech-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1em;
+    font-size: 0.95em;
+}
+.speech-table th,
+.speech-table td {
+    padding: 0.6em;
+    text-align: left;
+    border-bottom: 1px solid #ccc;
+    vertical-align: top;
+}
+.speech-table tr:last-child td {
+    border-bottom: none;
+}
+.speech-table th {
+    background: #f8f8f8;
+    font-weight: bold;
+    color: #333;
+    white-space: nowrap;
+}
+
+.speech-heading {
+    font-size: 0.85em;
+    color: #666;
+}
