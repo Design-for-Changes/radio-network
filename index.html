@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>ブロードリスニング関心マップ（第1周目）</title>
+  <title>ブロードリスニング関心マップ（意味ベース版）</title>
   <script src="https://d3js.org/d3.v7.min.js"></script>
   <style>
     body { margin: 0; overflow: hidden; }
@@ -27,8 +27,8 @@ const tooltip = d3.select("#tooltip");
 
 const color = d3.scaleOrdinal(d3.schemeTableau10);
 
-// JSONファイルを読み込む
-fetch("broadlistening_full_map.json")
+// 新しい意味ベースJSONを読み込む
+fetch("broadlistening_full_map_meaning_based.json")
   .then(response => response.json())
   .then(data => {
     const nodes = data.nodes;
