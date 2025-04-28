@@ -4,180 +4,101 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>構想デザイン論 座席表（リファクタリング版）</title>
-  
-<style>
-  body {
-    font-family: sans-serif;
-    background: #f5f5f5;
-    padding: 2vw;
-    text-align: center;
-  }
-
-  h1 {
-    margin-bottom: 2vw;
-    font-size: 2.5vw;
-  }
-
-  .seating-chart {
-    display: grid;
-    grid-template-columns: 8vw repeat(5, 14vw);
-    gap: 1vw;
-    justify-content: center;
-  }
-
-  .front-label {
-    grid-column: 2 / 7;
-    background: #444;
-    color: white;
-    font-weight: bold;
-    font-size: 1.5vw;
-    height: 5vw;
-    line-height: 5vw;
-    border-radius: 1vw;
-    margin-bottom: 1vw;
-    text-align: center;
-  }
-
-  .row-label {
-    text-align: right;
-    line-height: 4vw;
-    font-weight: bold;
-    font-size: 1vw;
-    min-width: 8vw;
-  }
-
-  .seat {
-    width: 14vw;
-    height: 4vw;
-    border-radius: 1vw;
-    text-align: center;
-    line-height: 4vw;
-    font-weight: bold;
-    background: #eee;
-    box-shadow: 0.2vw 0.2vw 0.4vw rgba(0,0,0,0.1);
-    font-size: 1vw;
-  }
-
-  table {
-    margin: 2vw auto;
-    border-collapse: collapse;
-    width: 90%;
-    background: #fff;
-    box-shadow: 0 0 1vw rgba(0,0,0,0.1);
-  }
-
-  th, td {
-    padding: 0.5em;
-    border: 1px solid #ccc;
-    font-size: 0.9rem;
-  }
-
-  th {
-    background: #eee;
-  }
-
-  .group-block {
-    margin: 4vw 0;
-  }
-
-  /* グループカラー適用 */
-.seat.group-1 { background: #fde2e2; }
-.seat.group-2 { background: #c8facc; }
-.seat.group-3 { background: #d1f0e1; }
-.seat.group-4 { background: #d0ebff; }
-.seat.group-5 { background: #e8daef; }
-.seat.group-6 { background: #fdf0d5; }
-.seat.group-7 { background: #c2f0c2; }
-.seat.group-8 { background: #d4d4ff; }
-.seat.group-9 { background: #ffcce0; }
-.seat.group-10 { background: #ffd6a5; }
-.seat.group-11 { background: #c9f2ff; }
-.seat.group-12 { background: #e0e0e0; }
-.seat.group-13 { background: #fcd5ce; }
-.seat.group-14 { background: #d3f8e2; }
-.seat.group-15 { background: #e4c1f9; }
-.seat.group-16 { background: #fafcc2; }
-.seat.group-17 { background: #b5ead7; }
-.seat.group-18 { background: #c7ceea; }
-.seat.group-19 { background: #ffb3b3; }
-.seat.group-20 { background: #ffffb3; }
-.seat.group-21 { background: #e0f7fa; }
-.seat.group-22 { background: #ffe0e0; }
-.seat.group-23 { background: #d1ffe7; }
-.seat.group-24 { background: #e0f4ff; }
-.seat.group-25 { background: #f0e0ff; }
-.seat.group-26 { background: #fff0d5; }
-.seat.group-27 { background: #ffe4e1; }
-.seat.group-28 { background: #daf7a6; }
-.seat.group-29 { background: #c7ecee; }
-.seat.group-30 { background: #f9e79f; }
-.seat.group-31 { background: #f5b7b1; }
-.seat.group-32 { background: #d2b4de; }
-.seat.group-33 { background: #aed6f1; }
-.seat.group-34 { background: #a9dfbf; }
-.seat.group-35 { background: #fad7a0; }
-
-@media (max-width: 768px) {
-  .seating-chart {
-    grid-template-columns: 10vw repeat(5, 16vw);
-    gap: 2vw;
-  }
-  .seat {
-    width: 16vw;
-    height: 6vw;
-    line-height: 6vw;
-    font-size: 1rem;
-  }
-  .row-label {
-    min-width: 10vw;
-    font-size: 0.9rem;
-  }
-  .front-label {
-    height: 6vw;
-    line-height: 6vw;
-    font-size: 1.2rem;
-  }
-  table {
-    width: 100%;
-  }
-  th, td {
-    padding: 0.3em;
-    font-size: 0.8rem;
-  }
-}
-
-@media (max-width: 768px) {
-  .seating-chart {
-    grid-template-columns: 8vw repeat(5, 16vw);
-    gap: 2vw;
-  }
-  .seat {
-    width: 16vw;
-    height: 6vw;
-    line-height: 6vw;
-    font-size: 0.6rem; /* 席内フォント縮小 */
-  }
-  .row-label {
-    min-width: 8vw;
-    font-size: 0.6rem; /* 行番号フォント縮小 */
-  }
-  .front-label {
-    height: 6vw;
-    line-height: 6vw;
-    font-size: 1rem; /* Frontラベルも少し小さめ */
-  }
-  table {
-    width: 100%;
-  }
-  th, td {
-    padding: 0.3em;
-    font-size: 0.9rem; /* テーブルフォントはほどよく */
-  }
-}
-
-</style>
-
+  <title>構想デザイン論 座席表（182名最新版）</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f5f5f5;
+      padding: 2vw;
+      text-align: center;
+    }
+    h1 {
+      margin-bottom: 2vw;
+      font-size: 3vw;
+    }
+    .seating-chart {
+      display: grid;
+      grid-template-columns: 8vw repeat(5, 14vw);
+      gap: 1vw;
+      justify-content: center;
+    }
+    .front-label {
+      grid-column: 2 / 7;
+      background: #444;
+      color: white;
+      font-weight: bold;
+      font-size: 1.5vw;
+      height: 5vw;
+      line-height: 5vw;
+      border-radius: 1vw;
+      margin-bottom: 1vw;
+      text-align: center;
+    }
+    .row-label {
+      text-align: right;
+      line-height: 4vw;
+      font-weight: bold;
+      font-size: 1vw;
+      min-width: 8vw;
+    }
+    .seat {
+      width: 14vw;
+      height: 4vw;
+      border-radius: 1vw;
+      text-align: center;
+      line-height: 4vw;
+      font-weight: bold;
+      background: #eee;
+      box-shadow: 0.2vw 0.2vw 0.4vw rgba(0,0,0,0.1);
+      font-size: 1vw;
+    }
+    table {
+      margin: 2vw auto;
+      border-collapse: collapse;
+      width: 90%;
+      background: #fff;
+      box-shadow: 0 0 1vw rgba(0,0,0,0.1);
+    }
+    th, td {
+      padding: 0.5em;
+      border: 1px solid #ccc;
+      font-size: 0.9rem;
+    }
+    th {
+      background: #eee;
+    }
+    .group-block {
+      margin: 4vw 0;
+    }
+    @media (max-width: 768px) {
+      .seating-chart {
+        grid-template-columns: 8vw repeat(5, 16vw);
+        gap: 2vw;
+      }
+      .seat {
+        width: 16vw;
+        height: 6vw;
+        line-height: 6vw;
+        font-size: 0.6rem;
+      }
+      .row-label {
+        min-width: 8vw;
+        font-size: 0.6rem;
+      }
+      .front-label {
+        height: 6vw;
+        line-height: 6vw;
+        font-size: 1rem;
+      }
+      table {
+        width: 100%;
+      }
+      th, td {
+        padding: 0.3em;
+        font-size: 0.9rem;
+      }
+    }
+  </style>
 </head>
 <body>
   <div class="page-header">
@@ -210,397 +131,398 @@
     });
   </script>
 
-  <h2>グループ別学生名簿</h2>
+  <h2 style="margin-top:4vw;margin-bottom:2vw;font-size:2.5vw;">グループ別学生名簿</h2>
 
   <section class="group-block">
   <h2>G01</h2>
   <table>
     <tr><th>学籍番号</th><th>氏名</th></tr>
-    <tr><td>CY24056</td><td>鈴木 希</td></tr>
-    <tr><td>CY24215</td><td>成沢 太海</td></tr>
-    <tr><td>CY24220</td><td>宮本 琉聖</td></tr>
-    <tr><td>CY24272</td><td>跡部 菜々子</td></tr>
-    <tr><td>CY24289</td><td>松澤 智朗</td></tr>
-    <tr><td>CY24304</td><td>中島 丈</td></tr>
+    <tr><td>CY24002</td><td>春日 由佑希</td></tr>
+    <tr><td>CY24019</td><td>佐藤 翔</td></tr>
+    <tr><td>CY24036</td><td>東村 玲</td></tr>
+    <tr><td>CY24070</td><td>馬島 怜依</td></tr>
+    <tr><td>CY24249</td><td>狩野 心</td></tr>
+    <tr><td>CY24291</td><td>戸田 大陽</td></tr>
 </table></section>
 
 <section class="group-block">
   <h2>G02</h2>
   <table>
     <tr><th>学籍番号</th><th>氏名</th></tr>
-    <tr><td>CY24038</td><td>荒井 智哉</td></tr>
-    <tr><td>CY24048</td><td>鈴木 一慶</td></tr>
-    <tr><td>CY24203</td><td>井上 晃誠</td></tr>
-    <tr><td>CY24222</td><td>文山 慶香</td></tr>
-    <tr><td>CY24230</td><td>西村 英晃</td></tr>
-    <tr><td>CY24258</td><td>井田 紳之心</td></tr>
+    <tr><td>CY24011</td><td>藤巻 悠太郎</td></tr>
+    <tr><td>CY24057</td><td>伊藤 大地</td></tr>
+    <tr><td>CY24225</td><td>片山 雄太</td></tr>
+    <tr><td>CY24242</td><td>迫村 陽真理</td></tr>
+    <tr><td>CY24269</td><td>田中 愛美</td></tr>
+    <tr><td>CY24289</td><td>松澤 智朗</td></tr>
 </table></section>
 
 <section class="group-block">
   <h2>G03</h2>
   <table>
     <tr><th>学籍番号</th><th>氏名</th></tr>
-    <tr><td>CY24030</td><td>渕田 鈴</td></tr>
-    <tr><td>CY24216</td><td>苅田 光優</td></tr>
-    <tr><td>CY24242</td><td>迫村 陽真理</td></tr>
-    <tr><td>CY24243</td><td>割田 陽斗</td></tr>
-    <tr><td>CY24277</td><td>後藤 慎之介</td></tr>
-    <tr><td>CY24300</td><td>木津谷 樹</td></tr>
+    <tr><td>CY24008</td><td>石峰 彩香</td></tr>
+    <tr><td>CY24010</td><td>鈴木 悠</td></tr>
+    <tr><td>CY24205</td><td>鈴木 舞</td></tr>
+    <tr><td>CY24255</td><td>多田 七海</td></tr>
+    <tr><td>CY24267</td><td>萩庭 隆太</td></tr>
+    <tr><td>CY24307</td><td>比嘉 音葉</td></tr>
 </table></section>
 
 <section class="group-block">
   <h2>G04</h2>
   <table>
     <tr><th>学籍番号</th><th>氏名</th></tr>
-    <tr><td>CY24001</td><td>大川 洸典</td></tr>
-    <tr><td>CY24061</td><td>篠﨑 啓汰</td></tr>
-    <tr><td>CY24204</td><td>宮嶋 立樹</td></tr>
-    <tr><td>CY24208</td><td>髙田 咲月</td></tr>
-    <tr><td>CY24254</td><td>小畑 諒英</td></tr>
-    <tr><td>CY24273</td><td>松村 一慶</td></tr>
+    <tr><td>CY24006</td><td>松岡 優太</td></tr>
+    <tr><td>CY24029</td><td>佐藤 有悟</td></tr>
+    <tr><td>CY24222</td><td>文山 慶香</td></tr>
+    <tr><td>CY24268</td><td>前田 萌香</td></tr>
+    <tr><td>CY24286</td><td>井上 紗綾</td></tr>
+    <tr><td>XX25802</td><td>坪田 明香里</td></tr>
 </table></section>
 
 <section class="group-block">
   <h2>G05</h2>
   <table>
     <tr><th>学籍番号</th><th>氏名</th></tr>
-    <tr><td>CY24016</td><td>林 那菜</td></tr>
-    <tr><td>CY24062</td><td>青谷 朱侑</td></tr>
-    <tr><td>CY24072</td><td>森 佑太</td></tr>
-    <tr><td>CY24251</td><td>圖子 大和</td></tr>
-    <tr><td>CY24263</td><td>森田 敦也</td></tr>
-    <tr><td>CY24280</td><td>馬場 唯磨</td></tr>
+    <tr><td>CY24025</td><td>佐々井 春菜</td></tr>
+    <tr><td>CY24064</td><td>今井 俊介</td></tr>
+    <tr><td>CY24065</td><td>幸田 未来</td></tr>
+    <tr><td>CY24080</td><td>志村 俊作</td></tr>
+    <tr><td>CY24275</td><td>島田 勢那</td></tr>
+    <tr><td>CY24301</td><td>羽根 涼詩</td></tr>
 </table></section>
 
 <section class="group-block">
   <h2>G06</h2>
   <table>
     <tr><th>学籍番号</th><th>氏名</th></tr>
-    <tr><td>CY24002</td><td>春日 由佑希</td></tr>
-    <tr><td>CY24075</td><td>西村 汎斗</td></tr>
-    <tr><td>CY24079</td><td>並木 香月</td></tr>
-    <tr><td>CY24214</td><td>下村 壮楽</td></tr>
-    <tr><td>CY24237</td><td>石川 暖和</td></tr>
-    <tr><td>CY24301</td><td>羽根 涼詩</td></tr>
+    <tr><td>CY24003</td><td>渡邊 翔太</td></tr>
+    <tr><td>CY24063</td><td>竹内 陽斗</td></tr>
+    <tr><td>CY24067</td><td>野崎 烈華</td></tr>
+    <tr><td>CY24258</td><td>井田 紳之心</td></tr>
+    <tr><td>CY24265</td><td>松畑 喜紀</td></tr>
+    <tr><td>CY24273</td><td>松村 一慶</td></tr>
 </table></section>
 
 <section class="group-block">
   <h2>G07</h2>
   <table>
     <tr><th>学籍番号</th><th>氏名</th></tr>
-    <tr><td>CY24029</td><td>佐藤 有悟</td></tr>
-    <tr><td>CY24031</td><td>新井 翔矢</td></tr>
-    <tr><td>CY24228</td><td>武藤 雄駕</td></tr>
-    <tr><td>CY24240</td><td>森 誠太朗</td></tr>
-    <tr><td>CY24298</td><td>落合 晶太郎</td></tr>
+    <tr><td>CY24007</td><td>山本 蒼良</td></tr>
+    <tr><td>CY24062</td><td>青谷 朱侑</td></tr>
+    <tr><td>CY24074</td><td>滝谷 瑠菜</td></tr>
+    <tr><td>CY24210</td><td>比留間 侑</td></tr>
+    <tr><td>CY24218</td><td>佐藤 克俊</td></tr>
+    <tr><td>CY24290</td><td>村山 朔</td></tr>
 </table></section>
 
 <section class="group-block">
   <h2>G08</h2>
   <table>
     <tr><th>学籍番号</th><th>氏名</th></tr>
-    <tr><td>CY24023</td><td>田代 直輝</td></tr>
-    <tr><td>CY24210</td><td>比留間 侑</td></tr>
-    <tr><td>CY24286</td><td>井上 紗綾</td></tr>
-    <tr><td>CY24290</td><td>村山 朔</td></tr>
-    <tr><td>CY24291</td><td>戸田 大陽</td></tr>
+    <tr><td>CY24015</td><td>松田 京佳</td></tr>
+    <tr><td>CY24034</td><td>池田 琴里</td></tr>
+    <tr><td>CY24071</td><td>髙梨 悠哉</td></tr>
+    <tr><td>CY24206</td><td>小林 謙二郎</td></tr>
+    <tr><td>CY24300</td><td>木津谷 樹</td></tr>
 </table></section>
 
 <section class="group-block">
   <h2>G09</h2>
   <table>
     <tr><th>学籍番号</th><th>氏名</th></tr>
-    <tr><td>CY24015</td><td>松田 京佳</td></tr>
-    <tr><td>CY24024</td><td>田窪 香椎</td></tr>
-    <tr><td>CY24028</td><td>小川 十輝</td></tr>
-    <tr><td>CY24055</td><td>竹内 凱輝</td></tr>
-    <tr><td>CY24267</td><td>萩庭 隆太</td></tr>
+    <tr><td>CY24058</td><td>安田 彩乃</td></tr>
+    <tr><td>CY24076</td><td>守谷 悠那</td></tr>
+    <tr><td>CY24214</td><td>下村 壮楽</td></tr>
+    <tr><td>CY24270</td><td>佐藤 聖悟</td></tr>
+    <tr><td>CY24272</td><td>跡部 菜々子</td></tr>
 </table></section>
 
 <section class="group-block">
   <h2>G10</h2>
   <table>
     <tr><th>学籍番号</th><th>氏名</th></tr>
-    <tr><td>CY24050</td><td>山田 旺輝</td></tr>
-    <tr><td>CY24064</td><td>今井 俊介</td></tr>
-    <tr><td>CY24207</td><td>玉木 秀杷</td></tr>
-    <tr><td>CY24218</td><td>佐藤 克俊</td></tr>
-    <tr><td>CY24224</td><td>小松崎 里桜</td></tr>
+    <tr><td>CY24024</td><td>田窪 香椎</td></tr>
+    <tr><td>CY24204</td><td>宮嶋 立樹</td></tr>
+    <tr><td>CY24211</td><td>宮澤 乃愛</td></tr>
+    <tr><td>CY24221</td><td>川北 兼資</td></tr>
+    <tr><td>CY24227</td><td>森 航平</td></tr>
 </table></section>
 
 <section class="group-block">
   <h2>G11</h2>
   <table>
     <tr><th>学籍番号</th><th>氏名</th></tr>
-    <tr><td>CY23027</td><td>高田 義人</td></tr>
-    <tr><td>CY24063</td><td>竹内 陽斗</td></tr>
-    <tr><td>CY24249</td><td>狩野 心</td></tr>
-    <tr><td>CY24257</td><td>小嶋 光</td></tr>
-    <tr><td>CY24278</td><td>島 英恵</td></tr>
+    <tr><td>CY24012</td><td>田中 凛</td></tr>
+    <tr><td>CY24049</td><td>小川 創</td></tr>
+    <tr><td>CY24246</td><td>川嶋 大翔</td></tr>
+    <tr><td>CY24264</td><td>川上 花音</td></tr>
+    <tr><td>CY24280</td><td>馬場 唯磨</td></tr>
 </table></section>
 
 <section class="group-block">
   <h2>G12</h2>
   <table>
     <tr><th>学籍番号</th><th>氏名</th></tr>
-    <tr><td>CY23246</td><td>吉田 悠人</td></tr>
-    <tr><td>CY24018</td><td>前原 優理</td></tr>
-    <tr><td>CY24201</td><td>塔ケ崎 玄</td></tr>
-    <tr><td>CY24202</td><td>中村 壮吾</td></tr>
-    <tr><td>CY24232</td><td>楠 昂輝</td></tr>
+    <tr><td>CY24056</td><td>鈴木 希</td></tr>
+    <tr><td>CY24066</td><td>増田 妃花</td></tr>
+    <tr><td>CY24078</td><td>大沢 紘生</td></tr>
+    <tr><td>CY24248</td><td>中島 健太郎</td></tr>
+    <tr><td>CY24292</td><td>高橋 りさ</td></tr>
 </table></section>
 
 <section class="group-block">
   <h2>G13</h2>
   <table>
     <tr><th>学籍番号</th><th>氏名</th></tr>
-    <tr><td>CY24017</td><td>辻本 春乃</td></tr>
-    <tr><td>CY24034</td><td>池田 琴里</td></tr>
-    <tr><td>CY24058</td><td>安田 彩乃</td></tr>
-    <tr><td>CY24059</td><td>中山 優希</td></tr>
-    <tr><td>CY24212</td><td>深井 倖隆</td></tr>
+    <tr><td>CY24014</td><td>鈴木 涼太</td></tr>
+    <tr><td>CY24069</td><td>河野 櫂</td></tr>
+    <tr><td>CY24081</td><td>深澤 和加</td></tr>
+    <tr><td>CY24228</td><td>武藤 雄駕</td></tr>
+    <tr><td>CY24244</td><td>中村 華</td></tr>
 </table></section>
 
 <section class="group-block">
   <h2>G14</h2>
   <table>
     <tr><th>学籍番号</th><th>氏名</th></tr>
-    <tr><td>CY24039</td><td>内木 小太郎</td></tr>
-    <tr><td>CY24262</td><td>今井 諒大</td></tr>
-    <tr><td>CY24275</td><td>島田 勢那</td></tr>
-    <tr><td>CY24285</td><td>廣田 珠理</td></tr>
-    <tr><td>CY24293</td><td>関口 匠弥</td></tr>
+    <tr><td>CY23027</td><td>高田 義人</td></tr>
+    <tr><td>CY24031</td><td>新井 翔矢</td></tr>
+    <tr><td>CY24032</td><td>藤江 美佳</td></tr>
+    <tr><td>CY24219</td><td>藤原 薫</td></tr>
+    <tr><td>CY24252</td><td>和田 大空</td></tr>
 </table></section>
 
 <section class="group-block">
   <h2>G15</h2>
   <table>
     <tr><th>学籍番号</th><th>氏名</th></tr>
-    <tr><td>CY24007</td><td>山本 蒼良</td></tr>
-    <tr><td>CY24008</td><td>石峰 彩香</td></tr>
-    <tr><td>CY24060</td><td>今福 令凰</td></tr>
-    <tr><td>CY24238</td><td>髙井 彩矢</td></tr>
-    <tr><td>CY24265</td><td>松畑 喜紀</td></tr>
+    <tr><td>CY24026</td><td>冨田 美晴</td></tr>
+    <tr><td>CY24240</td><td>森 誠太朗</td></tr>
+    <tr><td>CY24257</td><td>小嶋 光</td></tr>
+    <tr><td>CY24287</td><td>花角 初香</td></tr>
+    <tr><td>CY24308</td><td>星 りほ</td></tr>
 </table></section>
 
 <section class="group-block">
   <h2>G16</h2>
   <table>
     <tr><th>学籍番号</th><th>氏名</th></tr>
-    <tr><td>CY24032</td><td>藤江 美佳</td></tr>
-    <tr><td>CY24044</td><td>大沢 沙夜</td></tr>
-    <tr><td>CY24047</td><td>渡邊 明香莉</td></tr>
-    <tr><td>CY24081</td><td>深澤 和加</td></tr>
-    <tr><td>CY24264</td><td>川上 花音</td></tr>
+    <tr><td>CY24040</td><td>角田 茉汐</td></tr>
+    <tr><td>CY24054</td><td>本橋 こころ</td></tr>
+    <tr><td>CY24247</td><td>渡邊 慶太</td></tr>
+    <tr><td>CY24256</td><td>伊藤 直太朗</td></tr>
+    <tr><td>CY24296</td><td>窪田 大貴</td></tr>
 </table></section>
 
 <section class="group-block">
   <h2>G17</h2>
   <table>
     <tr><th>学籍番号</th><th>氏名</th></tr>
-    <tr><td>CY24019</td><td>佐藤 翔</td></tr>
-    <tr><td>CY24033</td><td>門田 優希</td></tr>
     <tr><td>CY24053</td><td>上原 乙夏</td></tr>
-    <tr><td>CY24227</td><td>森 航平</td></tr>
-    <tr><td>CY24271</td><td>大槻 彩圭</td></tr>
+    <tr><td>CY24072</td><td>森 佑太</td></tr>
+    <tr><td>CY24083</td><td>平松 うらら</td></tr>
+    <tr><td>CY24237</td><td>石川 暖和</td></tr>
+    <tr><td>CY24294</td><td>山口 幹太</td></tr>
 </table></section>
 
 <section class="group-block">
   <h2>G18</h2>
   <table>
     <tr><th>学籍番号</th><th>氏名</th></tr>
-    <tr><td>CY24037</td><td>橋本 和</td></tr>
-    <tr><td>CY24067</td><td>野崎 烈華</td></tr>
-    <tr><td>CY24241</td><td>小澤 心都</td></tr>
-    <tr><td>CY24260</td><td>大橋 拓磨</td></tr>
-    <tr><td>CY24284</td><td>根本 ここみ</td></tr>
+    <tr><td>CY24051</td><td>福永 幸</td></tr>
+    <tr><td>CY24055</td><td>竹内 凱輝</td></tr>
+    <tr><td>CY24202</td><td>中村 壮吾</td></tr>
+    <tr><td>CY24233</td><td>西澤 悠</td></tr>
+    <tr><td>CY24261</td><td>神長 洸太</td></tr>
 </table></section>
 
 <section class="group-block">
   <h2>G19</h2>
   <table>
     <tr><th>学籍番号</th><th>氏名</th></tr>
-    <tr><td>CY24046</td><td>水谷 航己</td></tr>
-    <tr><td>CY24248</td><td>中島 健太郎</td></tr>
-    <tr><td>CY24261</td><td>神長 洸太</td></tr>
-    <tr><td>CY24268</td><td>前田 萌香</td></tr>
-    <tr><td>CY24279</td><td>坂巻 恭丞</td></tr>
+    <tr><td>CY24060</td><td>今福 令凰</td></tr>
+    <tr><td>CY24212</td><td>深井 倖隆</td></tr>
+    <tr><td>CY24260</td><td>大橋 拓磨</td></tr>
+    <tr><td>CY24263</td><td>森田 敦也</td></tr>
+    <tr><td>CY24283</td><td>福田 洸</td></tr>
 </table></section>
 
 <section class="group-block">
   <h2>G20</h2>
   <table>
     <tr><th>学籍番号</th><th>氏名</th></tr>
-    <tr><td>CY24009</td><td>河野 響</td></tr>
-    <tr><td>CY24071</td><td>髙梨 悠哉</td></tr>
-    <tr><td>CY24073</td><td>岡田 康作</td></tr>
-    <tr><td>CY24226</td><td>寺下 日凛</td></tr>
-    <tr><td>CY24229</td><td>村上 昂洋</td></tr>
+    <tr><td>CY24016</td><td>林 那菜</td></tr>
+    <tr><td>CY24033</td><td>門田 優希</td></tr>
+    <tr><td>CY24068</td><td>東海林 優愛</td></tr>
+    <tr><td>CY24079</td><td>並木 香月</td></tr>
+    <tr><td>CY24216</td><td>苅田 光優</td></tr>
 </table></section>
 
 <section class="group-block">
   <h2>G21</h2>
   <table>
     <tr><th>学籍番号</th><th>氏名</th></tr>
-    <tr><td>CY24011</td><td>藤巻 悠太郎</td></tr>
-    <tr><td>CY24012</td><td>田中 凛</td></tr>
-    <tr><td>CY24026</td><td>冨田 美晴</td></tr>
+    <tr><td>CY24048</td><td>鈴木 一慶</td></tr>
     <tr><td>CY24213</td><td>佃 佳奈枝</td></tr>
-    <tr><td>CY24302</td><td>佐藤 晴</td></tr>
+    <tr><td>CY24230</td><td>西村 英晃</td></tr>
+    <tr><td>CY24254</td><td>小畑 諒英</td></tr>
+    <tr><td>CY24278</td><td>島 英恵</td></tr>
 </table></section>
 
 <section class="group-block">
   <h2>G22</h2>
   <table>
     <tr><th>学籍番号</th><th>氏名</th></tr>
-    <tr><td>CY24077</td><td>山口 由宇我</td></tr>
-    <tr><td>CY24231</td><td>岩谷 大河</td></tr>
-    <tr><td>CY24244</td><td>中村 華</td></tr>
-    <tr><td>CY24253</td><td>山本 愛斗</td></tr>
-    <tr><td>XX25802</td><td>坪田 明香里</td></tr>
+    <tr><td>CY24028</td><td>小川 十輝</td></tr>
+    <tr><td>CY24208</td><td>髙田 咲月</td></tr>
+    <tr><td>CY24226</td><td>寺下 日凛</td></tr>
+    <tr><td>CY24259</td><td>凌 霄</td></tr>
+    <tr><td>CY24279</td><td>坂巻 恭丞</td></tr>
 </table></section>
 
 <section class="group-block">
   <h2>G23</h2>
   <table>
     <tr><th>学籍番号</th><th>氏名</th></tr>
-    <tr><td>CY24083</td><td>平松 うらら</td></tr>
-    <tr><td>CY24247</td><td>渡邊 慶太</td></tr>
-    <tr><td>CY24269</td><td>田中 愛美</td></tr>
-    <tr><td>CY24270</td><td>佐藤 聖悟</td></tr>
-    <tr><td>CY24307</td><td>比嘉 音葉</td></tr>
+    <tr><td>CY24001</td><td>大川 洸典</td></tr>
+    <tr><td>CY24047</td><td>渡邊 明香莉</td></tr>
+    <tr><td>CY24050</td><td>山田 旺輝</td></tr>
+    <tr><td>CY24061</td><td>篠﨑 啓汰</td></tr>
+    <tr><td>CY24277</td><td>後藤 慎之介</td></tr>
 </table></section>
 
 <section class="group-block">
   <h2>G24</h2>
   <table>
     <tr><th>学籍番号</th><th>氏名</th></tr>
-    <tr><td>CY24069</td><td>河野 櫂</td></tr>
-    <tr><td>CY24078</td><td>大沢 紘生</td></tr>
-    <tr><td>CY24082</td><td>下方 琉聖</td></tr>
-    <tr><td>CY24211</td><td>宮澤 乃愛</td></tr>
-    <tr><td>CY24219</td><td>藤原 薫</td></tr>
+    <tr><td>CY24030</td><td>渕田 鈴</td></tr>
+    <tr><td>CY24201</td><td>塔ケ崎 玄</td></tr>
+    <tr><td>CY24203</td><td>井上 晃誠</td></tr>
+    <tr><td>CY24224</td><td>小松崎 里桜</td></tr>
+    <tr><td>CY24262</td><td>今井 諒大</td></tr>
 </table></section>
 
 <section class="group-block">
   <h2>G25</h2>
   <table>
     <tr><th>学籍番号</th><th>氏名</th></tr>
-    <tr><td>CY24004</td><td>柳平 悠斗</td></tr>
-    <tr><td>CY24252</td><td>和田 大空</td></tr>
-    <tr><td>CY24256</td><td>伊藤 直太朗</td></tr>
-    <tr><td>CY24288</td><td>阿部 遥人</td></tr>
-    <tr><td>CY24292</td><td>高橋 りさ</td></tr>
+    <tr><td>CY24017</td><td>辻本 春乃</td></tr>
+    <tr><td>CY24207</td><td>玉木 秀杷</td></tr>
+    <tr><td>CY24253</td><td>山本 愛斗</td></tr>
+    <tr><td>CY24284</td><td>根本 ここみ</td></tr>
+    <tr><td>CY24299</td><td>西澤 優和</td></tr>
 </table></section>
 
 <section class="group-block">
   <h2>G26</h2>
   <table>
     <tr><th>学籍番号</th><th>氏名</th></tr>
-    <tr><td>CY24003</td><td>渡邊 翔太</td></tr>
-    <tr><td>CY24013</td><td>錦織 秀太</td></tr>
-    <tr><td>CY24025</td><td>佐々井 春菜</td></tr>
-    <tr><td>CY24045</td><td>杉田 涼羽</td></tr>
+    <tr><td>CY24018</td><td>前原 優理</td></tr>
+    <tr><td>CY24042</td><td>四元 苺花</td></tr>
     <tr><td>CY24209</td><td>鳥越 希帆</td></tr>
+    <tr><td>CY24217</td><td>兪 咏欣</td></tr>
+    <tr><td>CY24304</td><td>中島 丈</td></tr>
 </table></section>
 
 <section class="group-block">
   <h2>G27</h2>
   <table>
     <tr><th>学籍番号</th><th>氏名</th></tr>
-    <tr><td>CY24065</td><td>幸田 未来</td></tr>
-    <tr><td>CY24080</td><td>志村 俊作</td></tr>
-    <tr><td>CY24205</td><td>鈴木 舞</td></tr>
-    <tr><td>CY24221</td><td>川北 兼資</td></tr>
-    <tr><td>CY24296</td><td>窪田 大貴</td></tr>
+    <tr><td>CY24020</td><td>柳澤 遙</td></tr>
+    <tr><td>CY24039</td><td>内木 小太郎</td></tr>
+    <tr><td>CY24075</td><td>西村 汎斗</td></tr>
+    <tr><td>CY24243</td><td>割田 陽斗</td></tr>
+    <tr><td>CY24293</td><td>関口 匠弥</td></tr>
 </table></section>
 
 <section class="group-block">
   <h2>G28</h2>
   <table>
     <tr><th>学籍番号</th><th>氏名</th></tr>
-    <tr><td>CY24020</td><td>柳澤 遙</td></tr>
-    <tr><td>CY24057</td><td>伊藤 大地</td></tr>
-    <tr><td>CY24206</td><td>小林 謙二郎</td></tr>
-    <tr><td>CY24234</td><td>増田 時生</td></tr>
-    <tr><td>CY24246</td><td>川嶋 大翔</td></tr>
+    <tr><td>CY24038</td><td>荒井 智哉</td></tr>
+    <tr><td>CY24077</td><td>山口 由宇我</td></tr>
+    <tr><td>CY24239</td><td>廣岡 爽汰</td></tr>
+    <tr><td>CY24271</td><td>大槻 彩圭</td></tr>
+    <tr><td>CY24303</td><td>高橋 真希</td></tr>
 </table></section>
 
 <section class="group-block">
   <h2>G29</h2>
   <table>
     <tr><th>学籍番号</th><th>氏名</th></tr>
-    <tr><td>CY24074</td><td>滝谷 瑠菜</td></tr>
-    <tr><td>CY24217</td><td>兪 咏欣</td></tr>
-    <tr><td>CY24225</td><td>片山 雄太</td></tr>
-    <tr><td>CY24294</td><td>山口 幹太</td></tr>
-    <tr><td>CY24303</td><td>高橋 真希</td></tr>
+    <tr><td>CY24004</td><td>柳平 悠斗</td></tr>
+    <tr><td>CY24013</td><td>錦織 秀太</td></tr>
+    <tr><td>CY24059</td><td>中山 優希</td></tr>
+    <tr><td>CY24288</td><td>阿部 遥人</td></tr>
+    <tr><td>CY24297</td><td>瀬下 あかね</td></tr>
 </table></section>
 
 <section class="group-block">
   <h2>G30</h2>
   <table>
     <tr><th>学籍番号</th><th>氏名</th></tr>
-    <tr><td>CY24054</td><td>本橋 こころ</td></tr>
-    <tr><td>CY24070</td><td>馬島 怜依</td></tr>
-    <tr><td>CY24233</td><td>西澤 悠</td></tr>
-    <tr><td>CY24239</td><td>廣岡 爽汰</td></tr>
-    <tr><td>CY24245</td><td>伊藤 朱音</td></tr>
+    <tr><td>CY24021</td><td>大熊 蒼</td></tr>
+    <tr><td>CY24043</td><td>齋藤 珠実</td></tr>
+    <tr><td>CY24046</td><td>水谷 航己</td></tr>
+    <tr><td>CY24251</td><td>圖子 大和</td></tr>
+    <tr><td>CY24302</td><td>佐藤 晴</td></tr>
 </table></section>
 
 <section class="group-block">
   <h2>G31</h2>
   <table>
     <tr><th>学籍番号</th><th>氏名</th></tr>
-    <tr><td>CY24021</td><td>大熊 蒼</td></tr>
-    <tr><td>CY24022</td><td>加計 柚人</td></tr>
-    <tr><td>CY24235</td><td>三石 涼雅</td></tr>
+    <tr><td>CY24044</td><td>大沢 沙夜</td></tr>
+    <tr><td>CY24045</td><td>杉田 涼羽</td></tr>
+    <tr><td>CY24215</td><td>成沢 太海</td></tr>
+    <tr><td>CY24231</td><td>岩谷 大河</td></tr>
     <tr><td>CY24282</td><td>都邉 柊真</td></tr>
-    <tr><td>CY24299</td><td>西澤 優和</td></tr>
 </table></section>
 
 <section class="group-block">
   <h2>G32</h2>
   <table>
     <tr><th>学籍番号</th><th>氏名</th></tr>
-    <tr><td>CY24006</td><td>松岡 優太</td></tr>
-    <tr><td>CY24036</td><td>東村 玲</td></tr>
-    <tr><td>CY24042</td><td>四元 苺花</td></tr>
-    <tr><td>CY24259</td><td>凌 霄</td></tr>
-    <tr><td>CY24287</td><td>花角 初香</td></tr>
+    <tr><td>CY24023</td><td>田代 直輝</td></tr>
+    <tr><td>CY24037</td><td>橋本 和</td></tr>
+    <tr><td>CY24232</td><td>楠 昂輝</td></tr>
+    <tr><td>CY24238</td><td>髙井 彩矢</td></tr>
+    <tr><td>CY24241</td><td>小澤 心都</td></tr>
 </table></section>
 
 <section class="group-block">
   <h2>G33</h2>
   <table>
     <tr><th>学籍番号</th><th>氏名</th></tr>
-    <tr><td>CY24014</td><td>鈴木 涼太</td></tr>
-    <tr><td>CY24049</td><td>小川 創</td></tr>
+    <tr><td>CY24082</td><td>下方 琉聖</td></tr>
+    <tr><td>CY24220</td><td>宮本 琉聖</td></tr>
     <tr><td>CY24223</td><td>大澤 祥悟</td></tr>
-    <tr><td>CY24255</td><td>多田 七海</td></tr>
-    <tr><td>CY24283</td><td>福田 洸</td></tr>
+    <tr><td>CY24234</td><td>増田 時生</td></tr>
+    <tr><td>CY24266</td><td>渡辺 健太郎</td></tr>
 </table></section>
 
 <section class="group-block">
   <h2>G34</h2>
   <table>
     <tr><th>学籍番号</th><th>氏名</th></tr>
-    <tr><td>CY24040</td><td>角田 茉汐</td></tr>
-    <tr><td>CY24051</td><td>福永 幸</td></tr>
-    <tr><td>CY24068</td><td>東海林 優愛</td></tr>
-    <tr><td>CY24297</td><td>瀬下 あかね</td></tr>
-    <tr><td>CY24308</td><td>星 りほ</td></tr>
+    <tr><td>CY24009</td><td>河野 響</td></tr>
+    <tr><td>CY24052</td><td>石井 葉奈</td></tr>
+    <tr><td>CY24245</td><td>伊藤 朱音</td></tr>
+    <tr><td>CY24285</td><td>廣田 珠理</td></tr>
+    <tr><td>CY24298</td><td>落合 晶太郎</td></tr>
 </table></section>
 
 <section class="group-block">
   <h2>G35</h2>
   <table>
     <tr><th>学籍番号</th><th>氏名</th></tr>
-    <tr><td>CY24010</td><td>鈴木 悠</td></tr>
-    <tr><td>CY24043</td><td>齋藤 珠実</td></tr>
-    <tr><td>CY24066</td><td>増田 妃花</td></tr>
-    <tr><td>CY24076</td><td>守谷 悠那</td></tr>
-    <tr><td>CY24266</td><td>渡辺 健太郎</td></tr>
+    <tr><td>CY23246</td><td>吉田 悠人</td></tr>
+    <tr><td>CY24022</td><td>加計 柚人</td></tr>
+    <tr><td>CY24073</td><td>岡田 康作</td></tr>
+    <tr><td>CY24229</td><td>村上 昂洋</td></tr>
+    <tr><td>CY24235</td><td>三石 涼雅</td></tr>
 </table></section>
 
 
