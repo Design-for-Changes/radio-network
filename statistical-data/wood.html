@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -13,86 +14,121 @@
 <body>
   <h1>木材需給表 見える化</h1>
 
-  <h2>総需要・国内生産・輸入の推移</h2>
-  <canvas id="chart-total"></canvas>
+  <h2>国内生産・輸入の推移（積み上げ＋総需要ライン）</h2>
+  <canvas id="chart-supply"></canvas>
 
   <h2>用途別構成（合計値）</h2>
   <canvas id="chart-usage"></canvas>
 
-  <h2>国内生産 vs 輸入（用途別）</h2>
-  <canvas id="chart-supply"></canvas>
+  <h2>用途別自給率推移</h2>
+  <canvas id="chart-selfsufficiency"></canvas>
 
   <script>
-    // CSVファイルのパス（同じディレクトリ or data/ に置く）
-    Papa.parse('data/wood_data.csv', {
+    Papa.parse('wood_data.csv', {
       download: true,
       header: true,
       complete: function(results) {
         const data = results.data;
 
-        // 年次
         const years = data.map(row => row['年次']);
-        // 総需要・国内・輸入
-        const total = data.map(row => +row['総需要量']);
-        const domestic = data.map(row => 
-          +row['国内生産_製材用'] + +row['国内生産_合板用'] + +row['国内生産_パルプ・チップ用'] + +row['国内生産_その他用'] + +row['国内生産_しいたけ原木'] + +row['国内生産_燃料材']
-        );
-        const imports = data.map(row => 
-          +row['輸入_製材用'] + +row['輸入_合板用'] + +row['輸入_パルプ・チップ用'] + +row['輸入_その他用'] + +row['輸入_しいたけ原木']
-        );
+        const domestic = data.map(row => +row['国内生産']);
+        const imports = data.map(row => +row['輸入']);
+        const totalDemand = data.map(row => +row['総需要量']);
 
-        // グラフ① 総需要・国内生産・輸入
-        new Chart(document.getElementById('chart-total'), {
-          type: 'line',
-          data: {
-            labels: years,
-            datasets: [
-              { label: '総需要量', data: total, borderWidth: 2, borderColor: 'black', fill: false },
-              { label: '国内生産', data: domestic, borderWidth: 2, borderColor: 'blue', fill: false },
-              { label: '輸入', data: imports, borderWidth: 2, borderColor: 'red', fill: false }
-            ]
-          },
-          options: { responsive: true }
-        });
-
-        // グラフ② 用途別（積み上げ棒）
-        new Chart(document.getElementById('chart-usage'), {
-          type: 'bar',
-          data: {
-            labels: years,
-            datasets: [
-              { label: '製材用', data: data.map(r => +r['製材用合計']), stack: 'stack1' },
-              { label: '合板用', data: data.map(r => +r['合板用合計']), stack: 'stack1' },
-              { label: 'パルプ・チップ用', data: data.map(r => +r['パルプ・チップ用合計']), stack: 'stack1' },
-              { label: 'その他用', data: data.map(r => +r['その他用合計']), stack: 'stack1' },
-              { label: 'しいたけ原木', data: data.map(r => +r['しいたけ原木合計']), stack: 'stack1' },
-              { label: '燃料材', data: data.map(r => +r['燃料材合計']), stack: 'stack1' }
-            ]
-          },
-          options: { responsive: true }
-        });
-
-        // グラフ③ 国内生産 vs 輸入（用途別）
+        // グラフ① 国内生産・輸入の積み上げ＋総需要ライン
         new Chart(document.getElementById('chart-supply'), {
           type: 'bar',
           data: {
             labels: years,
             datasets: [
-              { label: '製材用_国内生産', data: data.map(r => +r['国内生産_製材用']), stack: 'domestic' },
-              { label: '製材用_輸入', data: data.map(r => +r['輸入_製材用']), stack: 'import' },
-              { label: '合板用_国内生産', data: data.map(r => +r['国内生産_合板用']), stack: 'domestic' },
-              { label: '合板用_輸入', data: data.map(r => +r['輸入_合板用']), stack: 'import' },
-              { label: 'パルプ・チップ用_国内生産', data: data.map(r => +r['国内生産_パルプ・チップ用']), stack: 'domestic' },
-              { label: 'パルプ・チップ用_輸入', data: data.map(r => +r['輸入_パルプ・チップ用']), stack: 'import' },
-              { label: 'その他用_国内生産', data: data.map(r => +r['国内生産_その他用']), stack: 'domestic' },
-              { label: 'その他用_輸入', data: data.map(r => +r['輸入_その他用']), stack: 'import' },
-              { label: 'しいたけ原木_国内生産', data: data.map(r => +r['国内生産_しいたけ原木']), stack: 'domestic' },
-              { label: 'しいたけ原木_輸入', data: data.map(r => +r['輸入_しいたけ原木']), stack: 'import' }
+              {
+                label: '国内生産',
+                data: domestic,
+                backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                stack: 'stack1'
+              },
+              {
+                label: '輸入',
+                data: imports,
+                backgroundColor: 'rgba(255, 99, 132, 0.7)',
+                stack: 'stack1'
+              },
+              {
+                label: '総需要量',
+                data: totalDemand,
+                type: 'line',
+                borderColor: 'black',
+                borderWidth: 2,
+                fill: false,
+                pointRadius: 0
+              }
             ]
           },
-          options: { responsive: true }
+          options: {
+            responsive: true,
+            scales: {
+              y: {
+                title: { display: true, text: '数量（千m³）' },
+                stacked: true
+              },
+              x: {
+                stacked: true
+              }
+            }
+          }
         });
 
+        // グラフ② 用途別構成
+        new Chart(document.getElementById('chart-usage'), {
+          type: 'bar',
+          data: {
+            labels: years,
+            datasets: [
+              { label: '製材用合計', data: data.map(r => +r['製材用合計']), stack: 'stack2' },
+              { label: '合板用合計', data: data.map(r => +r['合板用合計']), stack: 'stack2' },
+              { label: 'パルプ・チップ用合計', data: data.map(r => +r['パルプ・チップ用合計']), stack: 'stack2' },
+              { label: 'その他用合計', data: data.map(r => +r['その他用合計']), stack: 'stack2' },
+              { label: 'しいたけ原木合計', data: data.map(r => +r['しいたけ原木合計']), stack: 'stack2' },
+              { label: '燃料材合計', data: data.map(r => +r['燃料材合計']), stack: 'stack2' }
+            ]
+          },
+          options: {
+            responsive: true,
+            scales: {
+              y: {
+                title: { display: true, text: '数量（千m³）' },
+                stacked: true
+              },
+              x: {
+                stacked: true
+              }
+            }
+          }
+        });
+
+        // グラフ③ 用途別自給率推移
+        new Chart(document.getElementById('chart-selfsufficiency'), {
+          type: 'line',
+          data: {
+            labels: years,
+            datasets: [
+              { label: '製材用自給率', data: data.map(r => +r['製材用自給率']), borderColor: 'blue', fill: false },
+              { label: '合板用自給率', data: data.map(r => +r['合板用自給率']), borderColor: 'green', fill: false },
+              { label: 'パルプ用自給率', data: data.map(r => +r['パルプ用自給率']), borderColor: 'orange', fill: false },
+              { label: 'その他用自給率', data: data.map(r => +r['その他用自給率']), borderColor: 'purple', fill: false },
+              { label: 'しいたけ自給率', data: data.map(r => +r['しいたけ自給率']), borderColor: 'brown', fill: false },
+              { label: '燃料材自給率', data: data.map(r => +r['燃料材自給率']), borderColor: 'gray', fill: false }
+            ]
+          },
+          options: {
+            responsive: true,
+            scales: {
+              y: {
+                title: { display: true, text: '自給率（％）' }
+              }
+            }
+          }
+        });
       }
     });
   </script>
