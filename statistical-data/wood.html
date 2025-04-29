@@ -21,20 +21,25 @@
   <table>
     <tr><th>データ名</th><td>木材需給表</td></tr>
     <tr><th>データ作成</th><td>農林水産省</td></tr>
-    <tr><th>データURL</th><td><a href="https://www.maff.go.jp/j/tokei/kouhyou/mokuzai_zyukyu/" target="_blank">https://www.maff.go.jp/j/tokei/kouhyou/mokuzai_zyukyu/</a></td></tr>
+    <tr><th>元データURL</th><td><a href="https://www.maff.go.jp/j/tokei/kouhyou/mokuzai_zyukyu/" target="_blank">https://www.maff.go.jp/j/tokei/kouhyou/mokuzai_zyukyu/</a></td></tr>
+    <tr><th>グラフ用データ</th><td><a href="wood_data.csv" target="_blank">wood_data.csv</a></td></tr>
   </table>
 
-  <h2>国内生産・輸入の推移（積み上げ＋総需要ライン＋全体自給率ライン）</h2>
+  <h2>国内生産・輸入の推移</h2>
   <canvas id="chart-supply"></canvas>
-  <p>国内生産と輸入の構成比を可視化。高度経済成長期以降、輸入材の割合が徐々に拡大している様子が見て取れる。</p>
+  <p>需要としては一時的に減少傾向となったが、ここ十年ほどで少しずつ伸び傾向にある。自給率も一時期は10%台まで減少したものの昨今では40%台を超えるなど、自給率が高まってきていることがわかる。</p>
 
   <h2>用途別構成（合計値）</h2>
   <canvas id="chart-usage"></canvas>
-  <p>木材需要の用途別構成を可視化。製材用が長年最大のシェアを占める一方、パルプ・チップ用や合板用の需要も一定の割合を保っている。</p>
+  <p>製材、合板材としての需要は減少傾向にあり、一方で燃料材としての需要が増え始めていることが分かる。2014年頃から増え始めたという傾向を見ても、原発停止に伴う電力不足がこれを引き上げる要因となったことが推測できる。</p>
+  
+  <table>
+    <tr><th>木質バイオマスの利用推進について</th><td>林野庁</td><td><a href="https://www.rinya.maff.go.jp/j/riyou/biomass/index.html" target="_blank">https://www.rinya.maff.go.jp/j/riyou/biomass/index.html</a></td></tr>
+  </table>
 
   <h2>用途別自給率推移</h2>
   <canvas id="chart-selfsufficiency"></canvas>
-  <p>用途別の自給率推移を可視化。全体として国内自給率は高水準を維持しているが、合板用など一部用途では輸入依存が顕著に見られる。</p>
+  <p>木材に関しては突如として需給の大きな変化がおとずれるパターンがいくつか散見される。製材・合板についてはジワジワと自給率が高まっていることが分かる。</p>
 
   <script>
     Papa.parse('wood_data.csv', {
