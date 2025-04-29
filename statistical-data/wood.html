@@ -47,9 +47,7 @@
         const domestic = data.map(row => +row['国内生産']);
         const imports = data.map(row => +row['輸入']);
         const totalDemand = data.map(row => +row['総需要量']);
-        const overallSelfSufficiency = data.map(row => 
-          totalDemand && +totalDemand > 0 ? (+row['国内生産'] / +row['総需要量']) * 100 : null
-        );
+        const overallSelfSufficiency = data.map(row => +row['全体自給率']); // ここだけ読む！
 
         // グラフ① 国内生産・輸入の積み上げ＋総需要ライン＋自給率ライン
         new Chart(document.getElementById('chart-supply'), {
