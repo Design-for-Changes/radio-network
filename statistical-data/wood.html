@@ -3,28 +3,41 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>木材需給表 見える化</title>
+  <title>見える化プロジェクト／木材需給表</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.1/papaparse.min.js"></script>
   <style>
     body { font-family: sans-serif; margin: 20px; }
     canvas { margin-bottom: 50px; }
+    table { margin-top: 20px; border-collapse: collapse; width: 100%; }
+    th, td { padding: 8px; border: 1px solid #ccc; }
+    th { background-color: #f0f0f0; }
+    p { font-size: 0.9em; margin-top: 10px; margin-bottom: 40px; }
   </style>
 </head>
 <body>
-  <h1>木材需給表 見える化</h1>
+  <h1>木材需給の状況を見える化</h1>
 
-  <h2>国内生産・輸入の推移（積み上げ＋総需要ライン）</h2>
+  <table>
+    <tr><th>データ名</th><td>木材需給表</td></tr>
+    <tr><th>データ作成</th><td>農林水産省</td></tr>
+    <tr><th>データURL</th><td><a href="https://www.maff.go.jp/j/tokei/kouhyou/mokuzai_zyukyu/" target="_blank">https://www.maff.go.jp/j/tokei/kouhyou/mokuzai_zyukyu/</a></td></tr>
+  </table>
+
+  <h2>国内生産・輸入の推移（積み上げ＋総需要ライン＋全体自給率ライン）</h2>
   <canvas id="chart-supply"></canvas>
+  <p>国内生産と輸入の構成比を可視化。高度経済成長期以降、輸入材の割合が徐々に拡大している様子が見て取れる。</p>
 
   <h2>用途別構成（合計値）</h2>
   <canvas id="chart-usage"></canvas>
+  <p>木材需要の用途別構成を可視化。製材用が長年最大のシェアを占める一方、パルプ・チップ用や合板用の需要も一定の割合を保っている。</p>
 
   <h2>用途別自給率推移</h2>
   <canvas id="chart-selfsufficiency"></canvas>
+  <p>用途別の自給率推移を可視化。全体として国内自給率は高水準を維持しているが、合板用など一部用途では輸入依存が顕著に見られる。</p>
 
   <script>
-    Papa.parse('wood_data.csv', {
+    Papa.parse('wood_data_fixed.csv', {
       download: true,
       header: true,
       complete: function(results) {
@@ -34,24 +47,30 @@
         const domestic = data.map(row => +row['国内生産']);
         const imports = data.map(row => +row['輸入']);
         const totalDemand = data.map(row => +row['総需要量']);
+        const overallSelfSufficiency = data.map(row => 
+          totalDemand && +totalDemand > 0 ? (+row['国内生産'] / +row['総需要量']) * 100 : null
+        );
 
-        // グラフ① 国内生産・輸入の積み上げ＋総需要ライン
+        // グラフ① 国内生産・輸入の積み上げ＋総需要ライン＋自給率ライン
         new Chart(document.getElementById('chart-supply'), {
-          type: 'bar',
           data: {
             labels: years,
             datasets: [
               {
                 label: '国内生産',
                 data: domestic,
+                type: 'bar',
                 backgroundColor: 'rgba(54, 162, 235, 0.7)',
-                stack: 'stack1'
+                stack: 'stack1',
+                yAxisID: 'y'
               },
               {
                 label: '輸入',
                 data: imports,
+                type: 'bar',
                 backgroundColor: 'rgba(255, 99, 132, 0.7)',
-                stack: 'stack1'
+                stack: 'stack1',
+                yAxisID: 'y'
               },
               {
                 label: '総需要量',
@@ -60,7 +79,19 @@
                 borderColor: 'black',
                 borderWidth: 2,
                 fill: false,
-                pointRadius: 0
+                pointRadius: 0,
+                yAxisID: 'y'
+              },
+              {
+                label: '全体自給率（％）',
+                data: overallSelfSufficiency,
+                type: 'line',
+                borderColor: 'blue',
+                borderDash: [5, 5],
+                borderWidth: 2,
+                fill: false,
+                pointRadius: 2,
+                yAxisID: 'y2'
               }
             ]
           },
@@ -69,7 +100,15 @@
             scales: {
               y: {
                 title: { display: true, text: '数量（千m³）' },
-                stacked: true
+                stacked: true,
+                position: 'left'
+              },
+              y2: {
+                title: { display: true, text: '自給率（％）' },
+                position: 'right',
+                grid: { drawOnChartArea: false },
+                min: 0,
+                max: 100
               },
               x: {
                 stacked: true
