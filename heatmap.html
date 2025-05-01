@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -42,8 +43,8 @@
       .attr("class", "tooltip")
       .style("opacity", 0);
 
-      d3.json("./user_weekday_stats.json").then(data => {
-      const users = Array.from(new Set(data.map(d => d.user)));
+    d3.json("./user_weekday_stats.json").then(data => {
+      const users = Array.from(new Set(data.map(d => d.user.trim())));
       const weekdays = ["月", "火", "水", "木", "金", "土", "日"];
 
       const color = d3.scaleSequential(d3.interpolateBlues)
@@ -51,7 +52,7 @@
 
       svg.attr("height", users.length * cellSize + margin.top + margin.bottom);
 
-      // 軸ラベル（曜日）
+      // 曜日ラベル
       svg.selectAll(".weekdayLabel")
         .data(weekdays)
         .enter().append("text")
@@ -70,12 +71,12 @@
         .style("text-anchor", "end");
 
       // セル描画
-      svg.selectAll(".row")
+      svg.selectAll(".cell")
         .data(data)
         .enter().append("rect")
         .attr("class", "cell")
-        .attr("x", d => weekdays.indexOf(d.weekday_name) * cellSize)
-        .attr("y", d => users.indexOf(d.user) * cellSize)
+        .attr("x", d => weekdays.indexOf(d.weekday_name.trim()) * cellSize)
+        .attr("y", d => users.indexOf(d.user.trim()) * cellSize)
         .attr("width", cellSize)
         .attr("height", cellSize)
         .attr("fill", d => color(d.post_count))
