@@ -3,7 +3,7 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>投稿ネットワーク（MDS切り替え修正版）</title>
+  <title>投稿ネットワーク（MDS描画修正版）</title>
   <script src="https://d3js.org/d3.v7.min.js"></script>
   <style>
     html, body {
@@ -94,7 +94,6 @@
       const userColorMap = {};
       users.forEach(user => userColorMap[user] = color(user));
 
-      // MDS位置の辞書化（Map使用）
       const mdsMap = new Map();
       mdsData.forEach(d => mdsMap.set(d.user, d));
 
@@ -143,21 +142,21 @@
       });
 
       function drag(simulation) {
-        function dragstarted(event, d) {
-          if (!event.active) simulation.alphaTarget(0.3).restart();
-          d.fx = d.x;
-          d.fy = d.y;
-        }
-        function dragged(event, d) {
-          d.fx = event.x;
-          d.fy = event.y;
-        }
-        function dragended(event, d) {
-          if (!event.active) simulation.alphaTarget(0);
-          d.fx = null;
-          d.fy = null;
-        }
-        return d3.drag().on("start", dragstarted).on("drag", dragged).on("end", dragended);
+        return d3.drag()
+          .on("start", (event, d) => {
+            if (!event.active) simulation.alphaTarget(0.3).restart();
+            d.fx = d.x;
+            d.fy = d.y;
+          })
+          .on("drag", (event, d) => {
+            d.fx = event.x;
+            d.fy = event.y;
+          })
+          .on("end", (event, d) => {
+            if (!event.active) simulation.alphaTarget(0);
+            d.fx = null;
+            d.fy = null;
+          });
       }
 
       // 凡例描画
@@ -181,6 +180,18 @@
               d.fy = height / 2 + (coord.y * 120);
             }
           });
+
+          // 🔧 ここで描画を即時更新する
+          node
+            .attr("cx", d => d.fx)
+            .attr("cy", d => d.fy);
+
+          link
+            .attr("x1", d => d.source.fx)
+            .attr("y1", d => d.source.fy)
+            .attr("x2", d => d.target.fx)
+            .attr("y2", d => d.target.fy);
+
         } else {
           graph.nodes.forEach(d => {
             d.fx = null;
