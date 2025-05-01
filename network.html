@@ -1,8 +1,9 @@
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>投稿ネットワーク（リンク強調＋自己リンク除外）</title>
+  <title>投稿ネットワーク（ハイライト付き）</title>
   <script src="https://d3js.org/d3.v7.min.js"></script>
   <style>
     html, body {
@@ -58,6 +59,17 @@
       border: 1px solid #999;
       cursor: pointer;
     }
+
+    .highlighted-link {
+      stroke: orange !important;
+      stroke-width: 4 !important;
+      stroke-opacity: 1 !important;
+    }
+
+    .highlighted-node {
+      stroke: black;
+      stroke-width: 2;
+    }
   </style>
 </head>
 <body>
@@ -95,7 +107,6 @@
       const userColorMap = {};
       users.forEach(user => userColorMap[user] = color(user));
 
-      // ノードに座標（cx, cy）を与える
       graph.nodes.forEach(d => {
         d.cx = width / (dates.length + 1) * dateIndex[d.date] + width / (dates.length + 1);
         d.cy = height / (users.length + 1) * userIndex[d.user] + height / (users.length + 1);
@@ -103,7 +114,6 @@
 
       const nodeMap = new Map(graph.nodes.map(d => [d.id, d]));
 
-      // similarityリンクから自己リンクを除外
       const filteredLinks = graph.links.filter(d => {
         const src = nodeMap.get(d.source);
         const tgt = nodeMap.get(d.target);
@@ -141,12 +151,23 @@
           tooltip.html(`<strong>${d.user}</strong><br>${d.date}<br>文字数: ${d.length}`)
             .style("left", (event.pageX + 10) + "px")
             .style("top", (event.pageY - 28) + "px");
+
+          d3.selectAll("line")
+            .classed("highlighted-link", l => l.source === d.id || l.target === d.id);
+
+          d3.selectAll("circle")
+            .classed("highlighted-node", n =>
+              n.id === d.id || filteredLinks.some(l =>
+                (l.source === d.id && l.target === n.id) ||
+                (l.target === d.id && l.source === n.id))
+            );
         })
         .on("mouseout", () => {
           tooltip.transition().duration(500).style("opacity", 0);
+          d3.selectAll("line").classed("highlighted-link", false);
+          d3.selectAll("circle").classed("highlighted-node", false);
         });
 
-      // 凡例描画
       const legend = d3.select("#legend");
       users.forEach(user => {
         const item = legend.append("div").attr("class", "legend-item");
@@ -154,7 +175,6 @@
         item.append("div").text(user);
       });
 
-      // リンク表示切り替え
       window.toggleLinks = function () {
         showLinks = !showLinks;
         d3.select("#link-group").selectAll("line")
