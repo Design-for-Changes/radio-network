@@ -3,7 +3,7 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>投稿ネットワーク（MDS切り替え付き）</title>
+  <title>投稿ネットワーク（MDS切り替え修正版）</title>
   <script src="https://d3js.org/d3.v7.min.js"></script>
   <style>
     html, body {
@@ -94,11 +94,9 @@
       const userColorMap = {};
       users.forEach(user => userColorMap[user] = color(user));
 
-      // MDS位置の辞書化
-      const mdsMap = {};
-      mdsData.forEach(d => {
-        mdsMap[d.user] = d;
-      });
+      // MDS位置の辞書化（Map使用）
+      const mdsMap = new Map();
+      mdsData.forEach(d => mdsMap.set(d.user, d));
 
       const simulation = d3.forceSimulation(graph.nodes)
         .force("link", d3.forceLink(graph.links).id(d => d.id).distance(100).strength(0.3))
@@ -170,15 +168,18 @@
         item.append("div").text(user);
       });
 
-      // MDSモードへの切り替え関数
+      // MDS切り替え
       window.toggleLayout = function () {
         useMDS = !useMDS;
         simulation.stop();
 
         if (useMDS) {
           graph.nodes.forEach(d => {
-            d.fx = width / 2 + (mdsMap[d.user].x * 120);  // 拡大倍率調整
-            d.fy = height / 2 + (mdsMap[d.user].y * 120);
+            const coord = mdsMap.get(d.user);
+            if (coord) {
+              d.fx = width / 2 + (coord.x * 120);
+              d.fy = height / 2 + (coord.y * 120);
+            }
           });
         } else {
           graph.nodes.forEach(d => {
