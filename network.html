@@ -1,9 +1,8 @@
-
 <!DOCTYPE html>
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>投稿ネットワーク（整列表示＋リンク表示切替）</title>
+  <title>投稿ネットワーク（整列表示＋リンク表示切替 修正版）</title>
   <script src="https://d3js.org/d3.v7.min.js"></script>
   <style>
     html, body {
@@ -96,6 +95,14 @@
       const userColorMap = {};
       users.forEach(user => userColorMap[user] = color(user));
 
+      // ノード座標を固定的に定義（cx, cy をデータ側に保持）
+      graph.nodes.forEach(d => {
+        d.cx = width / (dates.length + 1) * dateIndex[d.date] + width / (dates.length + 1);
+        d.cy = height / (users.length + 1) * userIndex[d.user] + height / (users.length + 1);
+      });
+
+      const nodeMap = new Map(graph.nodes.map(d => [d.id, d]));
+
       const link = container.append("g")
         .attr("id", "link-group")
         .selectAll("line")
@@ -104,7 +111,11 @@
         .attr("stroke", "#aaa")
         .attr("stroke-opacity", 0.3)
         .attr("stroke-width", d => d.similarity * 2)
-        .style("display", "none"); // 初期は非表示
+        .attr("x1", d => nodeMap.get(d.source).cx)
+        .attr("y1", d => nodeMap.get(d.source).cy)
+        .attr("x2", d => nodeMap.get(d.target).cx)
+        .attr("y2", d => nodeMap.get(d.target).cy)
+        .style("display", "none");
 
       const node = container.append("g")
         .selectAll("circle")
@@ -112,8 +123,8 @@
         .enter().append("circle")
         .attr("r", d => radius(d.length))
         .attr("fill", d => color(d.user))
-        .attr("cx", d => width / (dates.length + 1) * dateIndex[d.date] + width / (dates.length + 1))
-        .attr("cy", d => height / (users.length + 1) * userIndex[d.user] + height / (users.length + 1))
+        .attr("cx", d => d.cx)
+        .attr("cy", d => d.cy)
         .on("mouseover", (event, d) => {
           tooltip.transition().duration(200).style("opacity", .9);
           tooltip.html(`<strong>${d.user}</strong><br>${d.date}<br>文字数: ${d.length}`)
@@ -124,17 +135,7 @@
           tooltip.transition().duration(500).style("opacity", 0);
         });
 
-      // ノード辞書化
-      const nodeMap = new Map(graph.nodes.map(d => [d.id, d]));
-
-      // リンク座標更新（位置が決まったあとに1回だけでOK）
-      link
-        .attr("x1", d => nodeMap.get(d.source).cx)
-        .attr("y1", d => nodeMap.get(d.source).cy)
-        .attr("x2", d => nodeMap.get(d.target).cx)
-        .attr("y2", d => nodeMap.get(d.target).cy);
-
-      // 凡例描画
+      // 凡例を描画
       const legend = d3.select("#legend");
       users.forEach(user => {
         const item = legend.append("div").attr("class", "legend-item");
@@ -142,7 +143,7 @@
         item.append("div").text(user);
       });
 
-      // リンク表示切り替え関数
+      // ボタンによるリンクの表示切り替え
       window.toggleLinks = function () {
         showLinks = !showLinks;
         d3.select("#link-group").selectAll("line")
