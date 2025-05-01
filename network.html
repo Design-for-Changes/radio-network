@@ -3,7 +3,7 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>投稿ネットワーク（MDS描画修正版）</title>
+  <title>投稿ネットワーク（ユーザー×日付 グリッド表示）</title>
   <script src="https://d3js.org/d3.v7.min.js"></script>
   <style>
     html, body {
@@ -62,7 +62,7 @@
   </style>
 </head>
 <body>
-  <div class="toggle-button" onclick="toggleLayout()">🔄 表示切り替え</div>
+  <div class="toggle-button" onclick="toggleLayout()">📊 グリッド表示に切り替え</div>
   <div id="legend" class="legend"></div>
   <svg></svg>
 
@@ -71,7 +71,7 @@
     const width = window.innerWidth;
     const height = window.innerHeight;
     const container = svg.append("g");
-    let useMDS = false;
+    let useGrid = false;
 
     svg.call(d3.zoom().on("zoom", (event) => {
       container.attr("transform", event.transform);
@@ -81,35 +81,20 @@
       .attr("class", "tooltip")
       .style("opacity", 0);
 
-    Promise.all([
-      d3.json("notion_similarity_network.json"),
-      d3.json("user_mds_coordinates.json")
-    ]).then(([graph, mdsData]) => {
+    d3.json("notion_similarity_network.json").then(graph => {
       const color = d3.scaleOrdinal(d3.schemeTableau10);
       const radius = d3.scaleSqrt()
         .domain([0, d3.max(graph.nodes, d => d.length)])
         .range([4, 20]);
 
       const users = Array.from(new Set(graph.nodes.map(d => d.user))).sort();
+      const dates = Array.from(new Set(graph.nodes.map(d => d.date))).sort();
+
+      const userIndex = Object.fromEntries(users.map((u, i) => [u, i]));
+      const dateIndex = Object.fromEntries(dates.map((d, i) => [d, i]));
+
       const userColorMap = {};
       users.forEach(user => userColorMap[user] = color(user));
-
-      const mdsMap = new Map();
-      mdsData.forEach(d => mdsMap.set(d.user, d));
-
-      const simulation = d3.forceSimulation(graph.nodes)
-        .force("link", d3.forceLink(graph.links).id(d => d.id).distance(100).strength(0.3))
-        .force("charge", d3.forceManyBody().strength(-80))
-        .force("center", d3.forceCenter(width / 2, height / 2))
-        .force("collision", d3.forceCollide().radius(d => radius(d.length) + 5));
-
-      const link = container.append("g")
-        .attr("stroke", "#aaa")
-        .attr("stroke-opacity", 0.6)
-        .selectAll("line")
-        .data(graph.links)
-        .enter().append("line")
-        .attr("stroke-width", d => d.similarity * 2);
 
       const node = container.append("g")
         .selectAll("circle")
@@ -117,7 +102,6 @@
         .enter().append("circle")
         .attr("r", d => radius(d.length))
         .attr("fill", d => color(d.user))
-        .call(drag(simulation))
         .on("mouseover", (event, d) => {
           tooltip.transition().duration(200).style("opacity", .9);
           tooltip.html(`<strong>${d.user}</strong><br>${d.date}<br>文字数: ${d.length}`)
@@ -128,36 +112,10 @@
           tooltip.transition().duration(500).style("opacity", 0);
         });
 
-      simulation.on("tick", () => {
-        if (!useMDS) {
-          link
-            .attr("x1", d => d.source.x)
-            .attr("y1", d => d.source.y)
-            .attr("x2", d => d.target.x)
-            .attr("y2", d => d.target.y);
-          node
-            .attr("cx", d => d.x)
-            .attr("cy", d => d.y);
-        }
-      });
-
-      function drag(simulation) {
-        return d3.drag()
-          .on("start", (event, d) => {
-            if (!event.active) simulation.alphaTarget(0.3).restart();
-            d.fx = d.x;
-            d.fy = d.y;
-          })
-          .on("drag", (event, d) => {
-            d.fx = event.x;
-            d.fy = event.y;
-          })
-          .on("end", (event, d) => {
-            if (!event.active) simulation.alphaTarget(0);
-            d.fx = null;
-            d.fy = null;
-          });
-      }
+      const link = container.append("g")
+        .selectAll("line")
+        .data([])
+        .enter().append("line"); // ダミー、エッジは使わない
 
       // 凡例描画
       const legend = d3.select("#legend");
@@ -167,37 +125,24 @@
         item.append("div").text(user);
       });
 
-      // MDS切り替え
+      // 表示切り替え
       window.toggleLayout = function () {
-        useMDS = !useMDS;
-        simulation.stop();
+        useGrid = !useGrid;
 
-        if (useMDS) {
-          graph.nodes.forEach(d => {
-            const coord = mdsMap.get(d.user);
-            if (coord) {
-              d.fx = width / 2 + (coord.x * 120);
-              d.fy = height / 2 + (coord.y * 120);
-            }
-          });
+        if (useGrid) {
+          // グリッドレイアウトに変更
+          const cellWidth = width / (dates.length + 1);
+          const cellHeight = height / (users.length + 1);
 
-          // 🔧 ここで描画を即時更新する
           node
-            .attr("cx", d => d.fx)
-            .attr("cy", d => d.fy);
+            .transition().duration(800)
+            .attr("cx", d => cellWidth * dateIndex[d.date] + cellWidth)
+            .attr("cy", d => cellHeight * userIndex[d.user] + cellHeight);
 
-          link
-            .attr("x1", d => d.source.fx)
-            .attr("y1", d => d.source.fy)
-            .attr("x2", d => d.target.fx)
-            .attr("y2", d => d.target.fy);
+          link.remove(); // エッジは消す
 
         } else {
-          graph.nodes.forEach(d => {
-            d.fx = null;
-            d.fy = null;
-          });
-          simulation.alpha(1).restart();
+          location.reload(); // 再読み込みで元のForce表示に戻す
         }
       };
     });
