@@ -3,7 +3,7 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>投稿ネットワーク（ズーム・凡例付き）</title>
+  <title>投稿ネットワーク（MDS切り替え付き）</title>
   <script src="https://d3js.org/d3.v7.min.js"></script>
   <style>
     html, body {
@@ -17,10 +17,6 @@
       width: 100vw;
       height: 100vh;
       display: block;
-    }
-    .link {
-      stroke: #aaa;
-      stroke-opacity: 0.6;
     }
     .tooltip {
       position: absolute;
@@ -53,9 +49,20 @@
       margin-right: 8px;
       border: 1px solid #ccc;
     }
+    .toggle-button {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      padding: 8px 12px;
+      font-size: 14px;
+      background: #eee;
+      border: 1px solid #999;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
+  <div class="toggle-button" onclick="toggleLayout()">🔄 表示切り替え</div>
   <div id="legend" class="legend"></div>
   <svg></svg>
 
@@ -63,18 +70,21 @@
     const svg = d3.select("svg");
     const width = window.innerWidth;
     const height = window.innerHeight;
-
-    const tooltip = d3.select("body").append("div")
-      .attr("class", "tooltip")
-      .style("opacity", 0);
-
     const container = svg.append("g");
+    let useMDS = false;
 
     svg.call(d3.zoom().on("zoom", (event) => {
       container.attr("transform", event.transform);
     }));
 
-    d3.json("notion_similarity_network.json").then(graph => {
+    const tooltip = d3.select("body").append("div")
+      .attr("class", "tooltip")
+      .style("opacity", 0);
+
+    Promise.all([
+      d3.json("notion_similarity_network.json"),
+      d3.json("user_mds_coordinates.json")
+    ]).then(([graph, mdsData]) => {
       const color = d3.scaleOrdinal(d3.schemeTableau10);
       const radius = d3.scaleSqrt()
         .domain([0, d3.max(graph.nodes, d => d.length)])
@@ -82,7 +92,13 @@
 
       const users = Array.from(new Set(graph.nodes.map(d => d.user))).sort();
       const userColorMap = {};
-      users.forEach((user, i) => userColorMap[user] = color(user));
+      users.forEach(user => userColorMap[user] = color(user));
+
+      // MDS位置の辞書化
+      const mdsMap = {};
+      mdsData.forEach(d => {
+        mdsMap[d.user] = d;
+      });
 
       const simulation = d3.forceSimulation(graph.nodes)
         .force("link", d3.forceLink(graph.links).id(d => d.id).distance(100).strength(0.3))
@@ -96,7 +112,6 @@
         .selectAll("line")
         .data(graph.links)
         .enter().append("line")
-        .attr("class", "link")
         .attr("stroke-width", d => d.similarity * 2);
 
       const node = container.append("g")
@@ -117,15 +132,16 @@
         });
 
       simulation.on("tick", () => {
-        link
-          .attr("x1", d => d.source.x)
-          .attr("y1", d => d.source.y)
-          .attr("x2", d => d.target.x)
-          .attr("y2", d => d.target.y);
-
-        node
-          .attr("cx", d => d.x)
-          .attr("cy", d => d.y);
+        if (!useMDS) {
+          link
+            .attr("x1", d => d.source.x)
+            .attr("y1", d => d.source.y)
+            .attr("x2", d => d.target.x)
+            .attr("y2", d => d.target.y);
+          node
+            .attr("cx", d => d.x)
+            .attr("cy", d => d.y);
+        }
       });
 
       function drag(simulation) {
@@ -143,21 +159,35 @@
           d.fx = null;
           d.fy = null;
         }
-        return d3.drag()
-          .on("start", dragstarted)
-          .on("drag", dragged)
-          .on("end", dragended);
+        return d3.drag().on("start", dragstarted).on("drag", dragged).on("end", dragended);
       }
 
-      // 凡例作成
+      // 凡例描画
       const legend = d3.select("#legend");
       users.forEach(user => {
         const item = legend.append("div").attr("class", "legend-item");
-        item.append("div")
-          .attr("class", "legend-color")
-          .style("background", userColorMap[user]);
+        item.append("div").attr("class", "legend-color").style("background", userColorMap[user]);
         item.append("div").text(user);
       });
+
+      // MDSモードへの切り替え関数
+      window.toggleLayout = function () {
+        useMDS = !useMDS;
+        simulation.stop();
+
+        if (useMDS) {
+          graph.nodes.forEach(d => {
+            d.fx = width / 2 + (mdsMap[d.user].x * 120);  // 拡大倍率調整
+            d.fy = height / 2 + (mdsMap[d.user].y * 120);
+          });
+        } else {
+          graph.nodes.forEach(d => {
+            d.fx = null;
+            d.fy = null;
+          });
+          simulation.alpha(1).restart();
+        }
+      };
     });
   </script>
 </body>
