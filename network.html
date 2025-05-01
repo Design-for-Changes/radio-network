@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>投稿ネットワーク（整列表示＋リンク表示切替 修正版）</title>
+  <title>投稿ネットワーク（リンク強調＋自己リンク除外）</title>
   <script src="https://d3js.org/d3.v7.min.js"></script>
   <style>
     html, body {
@@ -95,7 +95,7 @@
       const userColorMap = {};
       users.forEach(user => userColorMap[user] = color(user));
 
-      // ノード座標を固定的に定義（cx, cy をデータ側に保持）
+      // ノードに座標（cx, cy）を与える
       graph.nodes.forEach(d => {
         d.cx = width / (dates.length + 1) * dateIndex[d.date] + width / (dates.length + 1);
         d.cy = height / (users.length + 1) * userIndex[d.user] + height / (users.length + 1);
@@ -103,14 +103,25 @@
 
       const nodeMap = new Map(graph.nodes.map(d => [d.id, d]));
 
+      // similarityリンクから自己リンクを除外
+      const filteredLinks = graph.links.filter(d => {
+        const src = nodeMap.get(d.source);
+        const tgt = nodeMap.get(d.target);
+        return src && tgt && src.user !== tgt.user;
+      });
+
+      const simExtent = d3.extent(filteredLinks, d => d.similarity);
+      const widthScale = d3.scaleLinear().domain(simExtent).range([0.5, 4]);
+      const opacityScale = d3.scaleLinear().domain(simExtent).range([0.1, 0.8]);
+
       const link = container.append("g")
         .attr("id", "link-group")
         .selectAll("line")
-        .data(graph.links)
+        .data(filteredLinks)
         .enter().append("line")
         .attr("stroke", "#aaa")
-        .attr("stroke-opacity", 0.3)
-        .attr("stroke-width", d => d.similarity * 2)
+        .attr("stroke-opacity", d => opacityScale(d.similarity))
+        .attr("stroke-width", d => widthScale(d.similarity))
         .attr("x1", d => nodeMap.get(d.source).cx)
         .attr("y1", d => nodeMap.get(d.source).cy)
         .attr("x2", d => nodeMap.get(d.target).cx)
@@ -135,7 +146,7 @@
           tooltip.transition().duration(500).style("opacity", 0);
         });
 
-      // 凡例を描画
+      // 凡例描画
       const legend = d3.select("#legend");
       users.forEach(user => {
         const item = legend.append("div").attr("class", "legend-item");
@@ -143,7 +154,7 @@
         item.append("div").text(user);
       });
 
-      // ボタンによるリンクの表示切り替え
+      // リンク表示切り替え
       window.toggleLinks = function () {
         showLinks = !showLinks;
         d3.select("#link-group").selectAll("line")
