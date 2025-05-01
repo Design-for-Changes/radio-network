@@ -3,7 +3,7 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>投稿ネットワーク（ユーザー×日付 グリッド表示）</title>
+  <title>投稿ネットワーク（整列表示＋リンク表示切替）</title>
   <script src="https://d3js.org/d3.v7.min.js"></script>
   <style>
     html, body {
@@ -62,7 +62,7 @@
   </style>
 </head>
 <body>
-  <div class="toggle-button" onclick="toggleLayout()">📊 グリッド表示に切り替え</div>
+  <div class="toggle-button" onclick="toggleLinks()">🧵 リンク表示/非表示</div>
   <div id="legend" class="legend"></div>
   <svg></svg>
 
@@ -71,7 +71,7 @@
     const width = window.innerWidth;
     const height = window.innerHeight;
     const container = svg.append("g");
-    let useGrid = false;
+    let showLinks = false;
 
     svg.call(d3.zoom().on("zoom", (event) => {
       container.attr("transform", event.transform);
@@ -96,12 +96,24 @@
       const userColorMap = {};
       users.forEach(user => userColorMap[user] = color(user));
 
+      const link = container.append("g")
+        .attr("id", "link-group")
+        .selectAll("line")
+        .data(graph.links)
+        .enter().append("line")
+        .attr("stroke", "#aaa")
+        .attr("stroke-opacity", 0.3)
+        .attr("stroke-width", d => d.similarity * 2)
+        .style("display", "none"); // 初期は非表示
+
       const node = container.append("g")
         .selectAll("circle")
         .data(graph.nodes)
         .enter().append("circle")
         .attr("r", d => radius(d.length))
         .attr("fill", d => color(d.user))
+        .attr("cx", d => width / (dates.length + 1) * dateIndex[d.date] + width / (dates.length + 1))
+        .attr("cy", d => height / (users.length + 1) * userIndex[d.user] + height / (users.length + 1))
         .on("mouseover", (event, d) => {
           tooltip.transition().duration(200).style("opacity", .9);
           tooltip.html(`<strong>${d.user}</strong><br>${d.date}<br>文字数: ${d.length}`)
@@ -112,10 +124,15 @@
           tooltip.transition().duration(500).style("opacity", 0);
         });
 
-      const link = container.append("g")
-        .selectAll("line")
-        .data([])
-        .enter().append("line"); // ダミー、エッジは使わない
+      // ノード辞書化
+      const nodeMap = new Map(graph.nodes.map(d => [d.id, d]));
+
+      // リンク座標更新（位置が決まったあとに1回だけでOK）
+      link
+        .attr("x1", d => nodeMap.get(d.source).cx)
+        .attr("y1", d => nodeMap.get(d.source).cy)
+        .attr("x2", d => nodeMap.get(d.target).cx)
+        .attr("y2", d => nodeMap.get(d.target).cy);
 
       // 凡例描画
       const legend = d3.select("#legend");
@@ -125,25 +142,11 @@
         item.append("div").text(user);
       });
 
-      // 表示切り替え
-      window.toggleLayout = function () {
-        useGrid = !useGrid;
-
-        if (useGrid) {
-          // グリッドレイアウトに変更
-          const cellWidth = width / (dates.length + 1);
-          const cellHeight = height / (users.length + 1);
-
-          node
-            .transition().duration(800)
-            .attr("cx", d => cellWidth * dateIndex[d.date] + cellWidth)
-            .attr("cy", d => cellHeight * userIndex[d.user] + cellHeight);
-
-          link.remove(); // エッジは消す
-
-        } else {
-          location.reload(); // 再読み込みで元のForce表示に戻す
-        }
+      // リンク表示切り替え関数
+      window.toggleLinks = function () {
+        showLinks = !showLinks;
+        d3.select("#link-group").selectAll("line")
+          .style("display", showLinks ? "block" : "none");
       };
     });
   </script>
