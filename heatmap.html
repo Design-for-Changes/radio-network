@@ -42,7 +42,7 @@
       .attr("class", "tooltip")
       .style("opacity", 0);
 
-    d3.json("user_weekday_stats.json").then(data => {
+      d3.json("./user_weekday_stats.json").then(data => {
       const users = Array.from(new Set(data.map(d => d.user)));
       const weekdays = ["月", "火", "水", "木", "金", "土", "日"];
 
